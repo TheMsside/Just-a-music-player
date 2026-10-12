@@ -95,6 +95,7 @@ body.ul #app,body.ul #tabs,body.ul #mini{animation:unlock .8s cubic-bezier(.2,.8
 .fi>div:first-child{flex:1;min-width:0;padding-right:10px}.fi b{font-size:20px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}.fi button{flex:none}
 .pk{display:flex;width:100%;margin:0 0 8px;justify-content:space-between;align-items:center;text-align:left}.pk i,.pk2 i{display:grid;opacity:0;color:var(--ac);transition:opacity .2s}.pk.on i,.pk2.on i{opacity:1}.pk.on{outline:2px solid var(--ac)}
 .pk2{display:flex;align-items:center;gap:12px;padding:8px;border-radius:14px;cursor:pointer}.pk2.on{background:var(--cd)}#pk{margin:6px 0 14px;max-height:50vh;overflow:auto}
+.fb{display:flex;flex:none}
 </style></head><body class=ul>
 <div id=app><main id=view></main></div>
 <div id=mini data-a=open><div class=cv id=mc></div><div class=mt><b id=mt></b><span id=ma></span></div><button class="ib ac" data-a=pp aria-label="Пуск/пауза"><span class=pp><i></i><i></i></span></button><div id=mp></div></div>
@@ -102,7 +103,7 @@ body.ul #app,body.ul #tabs,body.ul #mini{animation:unlock .8s cubic-bezier(.2,.8
 <section id=full><div id=bg></div>
 <div class=top><button class=ib data-a=close data-ic=down aria-label="Свернуть"></button><b>Сейчас играет</b><button class=ib data-a=queue data-ic=list aria-label="Очередь"></button></div>
 <div id=stage><div id=art></div><div id=ly></div></div>
-<div class=fi><div style="min-width:0"><b id=ft></b><span id=fa></span></div><button data-a=lyr data-ic=lyr aria-label="Текст песни"></button></div>
+<div class=fi><div style="min-width:0"><b id=ft></b><span id=fa></span></div><div class=fb><button data-a=dev data-ic=bt aria-label="Устройства"></button><button data-a=lyr data-ic=lyr aria-label="Текст песни"></button></div></div>
 <input type=range id=seek min=0 max=100 step=.1 value=0 aria-label="Перемотка"><div class=tm><span id=tc>0:00</span><span id=td>0:00</span></div>
 <div class=ctl><button data-a=shuf id=bs data-ic=shuf></button><button data-a=prev data-ic=prev></button><button class=big data-a=pp><span class=pp><i></i><i></i></span></button><button data-a=next data-ic=next></button><button data-a=rep id=br data-ic=rep></button></div></section>
 <div id=toast></div>
@@ -432,7 +433,7 @@ dots:'<g stroke="none" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circ
 grip:'<g stroke="none" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></g>',
 shuf:'<path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>',rep:'<path d="M17 2l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/>',
 rep1:'<path d="M17 2l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3M11 10.5l1.4-.9v5"/>',
-pin:'<path d="M12 16v6M8 3h8l-1.5 6.5L18 13v3H6v-3l3.5-3.5z"/>',lyr:'<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/>',
+pin:'<path d="M12 16v6M8 3h8l-1.5 6.5L18 13v3H6v-3l3.5-3.5z"/>',lyr:'<rect x="4" y="3.5" width="16" height="17" rx="3"/><path d="M8 8.5h8M8 12h8M8 15.5h8"/>',bt:'<path d="M6.5 6.5l11 11L12 23V1l5.5 5.5-11 11"/>',
 grid:'<rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/>'};
 const ic=n=>`<svg viewBox="0 0 24 24">${IC[n]}</svg>`;
 document.querySelectorAll('[data-ic]').forEach(e=>e.innerHTML=ic(e.dataset.ic));
@@ -470,6 +471,17 @@ if(/^https?:$/.test(location.protocol)){const I192="data:image/png;base64,iVBORw
  const mk=(r,h)=>{const l=document.createElement('link');l.rel=r;l.href=h;document.head.append(l)};
  mk('manifest',URL.createObjectURL(new Blob([JSON.stringify(man)],{type:'application/manifest+json'})));mk('apple-touch-icon',I192)}
 IC.check='<path d="M5 12l5 5 9-10"/>';
+[['Устройства','Devices','Dispositivos','Пристрої','Geräte','Appareils'],['Найти Bluetooth-устройства','Find Bluetooth devices','Buscar dispositivos Bluetooth','Знайти пристрої Bluetooth','Bluetooth-Geräte suchen','Rechercher des appareils Bluetooth'],
+['Найдено рядом','Found nearby','Encontrados cerca','Знайдено поруч','In der Nähe gefunden','Trouvés à proximité'],['Звук идёт на','Playing through','Sonando en','Звук іде на','Wiedergabe über','Lecture sur'],
+['Устройства не выбраны','No device selected','Ningún dispositivo seleccionado','Пристрої не вибрано','Kein Gerät ausgewählt','Aucun appareil sélectionné'],
+['Наушники и колонки подключаются в настройках Android, звук пойдёт на них сам. Браузер видит только часть устройств рядом.','Connect headphones or speakers in Android settings and sound will switch to them automatically. The browser can only see some nearby devices.','Conecta auriculares o altavoces en los ajustes de Android y el sonido cambiará solo. El navegador solo ve algunos dispositivos cercanos.','Підключіть навушники чи колонку в налаштуваннях Android, і звук піде на них сам. Браузер бачить лише частину пристроїв поруч.','Verbinde Kopfhörer oder Lautsprecher in den Android-Einstellungen, der Ton wechselt dann automatisch. Der Browser sieht nur einen Teil der Geräte in der Nähe.','Connectez casque ou enceinte dans les réglages Android : le son basculera tout seul. Le navigateur ne voit qu’une partie des appareils proches.'],
+['Этот браузер не поддерживает поиск Bluetooth','This browser does not support Bluetooth search','Este navegador no admite la búsqueda Bluetooth','Цей браузер не підтримує пошук Bluetooth','Dieser Browser unterstützt keine Bluetooth-Suche','Ce navigateur ne prend pas en charge la recherche Bluetooth'],
+['Без названия','Unnamed','Sin nombre','Без назви','Unbenannt','Sans nom']].forEach(r=>M[r[0]]=r);
+/* кнопка «Устройства»: поиск Bluetooth-устройств (Web Bluetooth) и текущий выход звука, если браузер отдаёт названия */
+async function outs(){try{return(await navigator.mediaDevices.enumerateDevices()).filter(x=>x.kind=='audiooutput'&&x.label).map(x=>x.label)}catch{return[]}}
+Object.assign(H,{dev:async()=>{const bt=!!navigator.bluetooth,o=await outs(),seen=[],row=n=>`<div class=cd style="margin-bottom:8px">${esc(n)}<span style="color:var(--ac)">${ic('bt')}</span></div>`;
+ const s=sheet(`<h2>Устройства</h2>${o.length?`<small>Звук идёт на</small>${o.map(row).join('')}`:''}${bt?`<button class="bt ac" data-x=bt style="margin:8px 0">${ic('bt')} Найти Bluetooth-устройства</button>`:'<small>Этот браузер не поддерживает поиск Bluetooth</small>'}<div id=fd></div><small>Наушники и колонки подключаются в настройках Android, звук пойдёт на них сам. Браузер видит только часть устройств рядом.</small>`);
+ s.addEventListener('click',async e=>{if(!e.target.closest('[data-x=bt]'))return;try{const d=await navigator.bluetooth.requestDevice({acceptAllDevices:true}),n=d.name||'Без названия';if(!seen.includes(n))seen.push(n);$('#fd',s).innerHTML='<small>Найдено рядом</small>'+seen.map(row).join('')}catch{toast('Устройства не выбраны')}})}});
 [['Готово','Done','Listo','Готово','Fertig','Terminé'],['Трек должен остаться хотя бы в одном плейлисте','A track must stay in at least one playlist','La canción debe estar en al menos una lista','Трек має залишатися хоча б в одному плейлисті','Der Titel muss in mindestens einer Playlist bleiben','Le titre doit rester dans au moins une playlist']].forEach(r=>M[r[0]]=r);
 Object.assign(H,{plpick:()=>pickTracks(V.id),
  unpl:async i=>{const p=P.find(x=>x.id==V.id);if(!p)return;if(!P.some(x=>x!==p&&x.ids.includes(i)))return rmT(i);p.ids=p.ids.filter(x=>x!=i);try{await put('p',p)}catch(e){saveErr(e)}render()}});
