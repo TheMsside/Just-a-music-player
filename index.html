@@ -238,7 +238,7 @@ const put=(s,v)=>tx(s,'readwrite',o=>o.put(v)),del=(s,k)=>tx(s,'readwrite',o=>o.
 const saveErr=e=>toast(e&&e.name=='QuotaExceededError'?'Не хватает места на устройстве':'Не удалось сохранить данные');
 /* ---------- состояние ---------- */
 let T=new Map(),P=[],V={n:'lib'},qs='',sort=LS('so')||'new',LST=[],cur=null,Q=[],Qo=[],qi=-1,shf=0,rep=0,dir=1,LY=[],li=-1,drag=0,sl=0,slEnd=0,swiped=0;
-const A=new Audio(),U=new WeakMap(),PC=new WeakMap();A.preload='auto';
+let A=new Audio();const E1=A,A2=new Audio(),U=new WeakMap(),PC=new WeakMap();A.preload='auto';A2.preload='auto';
 const url=b=>b?(U.get(b)||(U.set(b,URL.createObjectURL(b)),U.get(b))):'';
 const hue=id=>[...String(id)].reduce((a,c)=>a+c.charCodeAt(0),0)%360;
 const cv=o=>o&&o.cover?`<img src="${url(o.cover)}" alt="">`:`<div class=ph style="background:linear-gradient(135deg,hsl(${hue(o.id)} 60% 45%),hsl(${hue(o.id)+50} 60% 25%))">${ic('note')}</div>`;
@@ -268,7 +268,8 @@ async function pal(t){if(!t.cover)return[`hsl(${hue(t.id)} 50% 32%)`,`hsl(${hue(
 /* ---------- плеер ---------- */
 const sh=a=>{a=a.slice();for(let i=a.length;i>1;){const j=Math.random()*i--|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 function play(ids,i){Qo=ids.slice();const id=ids[i];Q=shf?[id,...sh(Qo.filter(x=>x!=id))]:Qo.slice();qi=Q.indexOf(id);dir=1;load(1)}
-function load(go){const t=T.get(Q[qi]);if(!t)return;cur=t;A.src=url(t.audio);if(go)A.play().catch(()=>toast('Не удалось воспроизвести этот файл'));ui(1)}
+function load(go){const t=T.get(Q[qi]);if(!t)return;cur=t;const o=A;if(go)A=o===E1?A2:E1;A.src=url(t.audio);
+ if(go){A.play().catch(()=>toast('Не удалось воспроизвести этот файл'));if(o!==A)o.pause();if('mediaSession'in navigator)navigator.mediaSession.playbackState='playing'}ui(1)}
 function nx(auto){if(!Q.length)return;dir=1;if(auto&&rep==2)return load(1);if(qi<Q.length-1)qi++;else if(rep==1||!auto)qi=0;else{A.pause();A.currentTime=0;return}load(1)}
 function pv(){if(!Q.length)return;if(A.currentTime>3){A.currentTime=0;return}dir=-1;qi=qi>0?qi-1:Q.length-1;load(1)}
 const toggle=()=>{if(!cur)return;A.paused?A.play().catch(()=>toast('Не удалось воспроизвести этот файл')):A.pause()};
@@ -371,7 +372,7 @@ function render0(){const v=$('#view');
   <h3>Кнопки при свайпе по треку</h3><small>Выберите от 1 до 5 кнопок</small><div>${Object.keys(ACT).map(k=>`<button class="ch${ACTS.includes(k)?' on':''}" data-a=act data-k=${k}><span>${ic(ACT[k][0])}</span>${ACT[k][1]}</button>`).join('')}</div><h3>Плавность анимаций</h3><div>${['Максимальная','Средняя','Минимальная'].map((n,k)=>`<button class="ch${AN==k?' on':''}" data-a=an data-k=${k}>${n}</button>`).join('')}</div>
   <h3>При низком заряде батареи</h3>${'getBattery'in navigator?'':'<small>Заряд батареи недоступен в этом браузере</small>'}<div>${[[0,'Выкл'],[10,'≤ 10%'],[20,'≤ 20%'],[30,'≤ 30%'],[50,'≤ 50%']].map(([v,n])=>`<button class="ch${BT.th==v?' on':''}" data-a=bth data-v=${v}>${n}</button>`).join('')}</div>
   <small>Снижать до</small><div>${[1,2].map(k=>`<button class="ch${BT.to==k?' on':''}" data-a=bto data-k=${k}>${['','Средняя','Минимальная'][k]}</button>`).join('')}</div><h3>Таймер сна</h3><div>${[0,15,30,60].map(m=>`<button class="ch${(!m&&!left)||(m&&left&&m==sl)?' on':''}" data-a=sleep data-m=${m}>${m?m+' мин':'Выкл'}</button>`).join('')}</div>${left?`<small>Пауза примерно через ${left} мин</small>`:''}
-  <h3>Хранилище</h3><small id=st>Все файлы хранятся только на этом устройстве.</small>`;
+  <h3>Хранилище</h3><small id=st>Все файлы хранятся только на этом устройстве.</small><small>Версия ${VER}</small>`;
   navigator.storage?.estimate?.().then(e=>{const el=$('#st');if(el&&e.quota)el.textContent=`Все файлы хранятся на устройстве. Занято ${(e.usage/1048576).toFixed(0)} МБ из ${(e.quota/1048576).toFixed(0)} МБ.`})}}
 /* ---------- события ---------- */
 const H={tab:(i,b)=>{const n=+b.dataset.i;if(n==1&&V.n=='pl'&&tg==1){V={n:'pls'};render()}tg=n;kick()},add:async()=>{const f=await pick('audio/*,.mp3,.m4a,.wav,.ogg,.flac',1);add(f)},
@@ -480,11 +481,16 @@ IC.check='<path d="M5 12l5 5 9-10"/>';
 /* кнопка «Устройства»: поиск Bluetooth-устройств (Web Bluetooth) и текущий выход звука, если браузер отдаёт названия */
 async function outs(){try{return(await navigator.mediaDevices.enumerateDevices()).filter(x=>x.kind=='audiooutput'&&x.label).map(x=>x.label)}catch{return[]}}
 Object.assign(H,{dev:async()=>{const bt=!!navigator.bluetooth,o=await outs(),seen=[],row=n=>`<div class=cd style="margin-bottom:8px">${esc(n)}<span style="color:var(--ac)">${ic('bt')}</span></div>`;
- const s=sheet(`<h2>Устройства</h2>${o.length?`<small>Звук идёт на</small>${o.map(row).join('')}`:''}${bt?`<button class="bt ac" data-x=bt style="margin:8px 0">${ic('bt')} Найти Bluetooth-устройства</button>`:'<small>Этот браузер не поддерживает поиск Bluetooth</small>'}<div id=fd></div><small>Наушники и колонки подключаются в настройках Android, звук пойдёт на них сам. Браузер видит только часть устройств рядом.</small>`);
+ const s=sheet(`<h2>Устройства</h2>${o.length?`<small>Звук идёт на</small>${o.map(row).join('')}`:''}${bt?`<button class="ch ac" data-x=bt style="margin:8px 0;font-size:13px">${ic('bt')} Найти Bluetooth-устройства</button>`:'<small>Этот браузер не поддерживает поиск Bluetooth</small>'}<div id=fd></div><small>Наушники и колонки подключаются в настройках Android, звук пойдёт на них сам. Браузер видит только часть устройств рядом.</small>`);
  s.addEventListener('click',async e=>{if(!e.target.closest('[data-x=bt]'))return;try{const d=await navigator.bluetooth.requestDevice({acceptAllDevices:true}),n=d.name||'Без названия';if(!seen.includes(n))seen.push(n);$('#fd',s).innerHTML='<small>Найдено рядом</small>'+seen.map(row).join('')}catch{toast('Устройства не выбраны')}})}});
 [['Готово','Done','Listo','Готово','Fertig','Terminé'],['Трек должен остаться хотя бы в одном плейлисте','A track must stay in at least one playlist','La canción debe estar en al menos una lista','Трек має залишатися хоча б в одному плейлисті','Der Titel muss in mindestens einer Playlist bleiben','Le titre doit rester dans au moins une playlist']].forEach(r=>M[r[0]]=r);
 Object.assign(H,{plpick:()=>pickTracks(V.id),
  unpl:async i=>{const p=P.find(x=>x.id==V.id);if(!p)return;if(!P.some(x=>x!==p&&x.ids.includes(i)))return rmT(i);p.ids=p.ids.filter(x=>x!=i);try{await put('p',p)}catch(e){saveErr(e)}render()}});
+/* два аудио-элемента: событие принимается только от текущего */
+['onplay','onpause','onended','onerror','ontimeupdate','onseeked'].forEach(k=>{const f=E1[k];E1[k]=e=>{if(A===E1&&f)f(e)};A2[k]=e=>{if(A===A2&&f)f(e)}});
+['play','pause','loadedmetadata','seeked'].forEach(n=>A2.addEventListener(n,n=='play'?setMS:posMS));
+A2.style.display='none';document.body.append(A2);
+const VER='v7';M['Версия']=['Версия','Version','Versión','Версія','Version','Version'];RX.push([/^Версия (.+)$/,m=>tp('Версия')+' '+m[1]]);
 document.documentElement.lang=lang;document.title=tr('Плеер');loc(document.body);
 
 (async()=>{try{await idb();T=new Map((await all('t')).map(t=>[t.id,t]));P=await all('p');if(!P.some(p=>p.id=='lib')){const l={id:'lib',name:'Библиотека',desc:'',cover:null,ids:[...T.values()].sort((a,b)=>a.added-b.added).map(t=>t.id),pinned:true,sys:1};P.push(l);await put('p',l)}}catch{toast('Хранилище недоступно: сохранение не будет работать')}navigator.storage?.persist?.();render();setTimeout(()=>document.body.classList.remove('ul'),1000)})();
